@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>동구밭 고객 인구통계 분석 2025</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f7f5;color:#1a1a1a;line-height:1.6}
+.container{max-width:820px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:20px;font-weight:600;margin-bottom:0.25rem}
+.subtitle{font-size:13px;color:#888;margin-bottom:1.25rem}
+.page-nav{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:2px solid #e0e0e0}
+.page-tab{padding:10px 20px;font-size:14px;font-weight:500;color:#888;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;font-family:inherit}
+.page-tab:hover{color:#555}
+.page-tab.active{color:#185fa5;border-bottom-color:#185fa5}
+.page{display:none}.page.active{display:block}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.5rem}
+.tab{padding:7px 16px;font-size:13px;border-radius:8px;border:1px solid #e0e0e0;background:#fff;color:#666;cursor:pointer;transition:all 0.2s;font-family:inherit}
+.tab:hover{border-color:#aaa}
+.tab.active{border-color:#3266ad;background:#e6f1fb;color:#185fa5;font-weight:500}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:1.5rem}
+.metric{background:#fff;border-radius:10px;padding:1rem 1.25rem;border:1px solid #eee}
+.metric-label{font-size:12px;color:#999}
+.metric-value{font-size:22px;font-weight:600;margin-top:4px;color:#1a1a1a}
+.section-label{font-size:13px;color:#888;margin-bottom:8px}
+.chart-wrap{position:relative;width:100%;height:280px;background:#fff;border-radius:10px;border:1px solid #eee;padding:1rem;margin-bottom:1.5rem}
+.gender-row{display:flex;align-items:center;gap:12px;margin-bottom:0.5rem}
+.gender-bar{flex:1;height:28px;border-radius:8px;overflow:hidden;display:flex}
+.gender-legend{display:flex;gap:14px;font-size:12px;color:#888;flex-shrink:0}
+.legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
+.insight{font-size:13px;color:#666;background:#fff;border-radius:10px;border:1px solid #eee;padding:1rem 1.25rem;line-height:1.7}
+.insight::before{content:"💡 "}
+
+.prod-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem}
+.prod-item{background:#fff;border:1px solid #eee;border-radius:10px;padding:14px 18px;cursor:pointer;transition:all 0.2s}
+.prod-item:hover{border-color:#aaa}
+.prod-item.active{border-color:#3266ad;box-shadow:0 0 0 1px #3266ad}
+.prod-row{display:flex;justify-content:space-between;align-items:center}
+.prod-rank{font-size:12px;color:#aaa;font-weight:600;margin-right:10px;min-width:22px}
+.prod-name{font-size:14px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prod-rev{font-size:13px;color:#185fa5;font-weight:500;margin-left:12px;white-space:nowrap}
+.prod-meta{display:flex;gap:16px;margin-top:6px;font-size:12px;color:#999}
+.prod-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.badge-peak{background:#e6f1fb;color:#185fa5}
+.badge-female{background:#fbeaf0;color:#993556}
+.badge-male{background:#e6f1fb;color:#185fa5}
+
+.detail-panel{background:#fff;border:1px solid #eee;border-radius:10px;padding:1.25rem;margin-bottom:1.5rem}
+.detail-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.detail-sub{font-size:12px;color:#999;margin-bottom:1rem}
+.detail-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+.dm{text-align:center;padding:8px 0}
+.dm-label{font-size:11px;color:#999}
+.dm-val{font-size:18px;font-weight:600;margin-top:2px}
+.detail-chart{position:relative;width:100%;height:220px;margin-bottom:1rem}
+.detail-gender{display:flex;align-items:center;gap:12px}
+.compare-note{font-size:12px;color:#888;margin-top:6px;line-height:1.6}
+
+@media(max-width:600px){
+  .metrics,.detail-metrics{grid-template-columns:1fr 1fr}
+  .container{padding:1.25rem 1rem}
+  .gender-row,.detail-gender{flex-direction:column;align-items:stretch}
+  .prod-rev{font-size:12px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>동구밭 고객 인구통계 분석</h1>
+  <p class="subtitle">2025년 상품 카테고리별 · 상품별 연령대 · 성별 분포 (결제금액 기준)</p>
+  
+  <div class="page-nav">
+    <button class="page-tab active" onclick="switchPage('overview')">카테고리 분석</button>
+    <button class="page-tab" onclick="switchPage('products')">상품별 세부 분석</button>
+  </div>
+
+  <div id="page-overview" class="page active">
+    <div class="tabs" id="tabs1"></div>
+    <div class="metrics" id="metrics1"></div>
+    <p class="section-label">연령대별 결제금액 비중</p>
+    <div class="chart-wrap"><canvas id="ageChart1"></canvas></div>
+    <p class="section-label">성별 비율</p>
+    <div class="gender-row" id="gender1"></div>
+    <div class="insight" id="insight1" style="margin-top:1rem"></div>
+  </div>
+
+  <div id="page-products" class="page">
+    <div class="tabs" id="tabs2"></div>
+    <div class="prod-list" id="prodList"></div>
+    <div class="detail-panel" id="detailPanel" style="display:none">
+      <div class="detail-title" id="detailTitle"></div>
+      <div class="detail-sub" id="detailSub"></div>
+      <div class="detail-metrics" id="detailMetrics"></div>
+      <p class="section-label">연령대별 결제금액 비중</p>
+      <div class="detail-chart"><canvas id="ageChart2"></canvas></div>
+      <p class="section-label">성별 비율</p>
+      <div class="detail-gender" id="gender2"></div>
+      <p class="compare-note" id="compareNote"></p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const CAT_DATA={"퍼퓸바":{age:{"14~16":0,"17~19":.1,"20~25":4.4,"26~30":16.4,"31~35":24.1,"36~40":20.3,"41~45":17.8,"46~50":8.3,"51~55":5.5,"56~60":2.2,"61~65":.7,"66~70":.1,"71+":.1},gender:{"남성":10.8,"여성":89},revenue:619339010,orders:15450,peak:"31~35세",note:"26~40세 핵심 구매층 (60.8%). 선물세트 수요로 남성 비중이 상대적으로 높은 카테고리입니다."},"샴푸바":{age:{"14~16":0,"17~19":.2,"20~25":4.9,"26~30":15.3,"31~35":21.4,"36~40":17.2,"41~45":17.7,"46~50":11.8,"51~55":6.8,"56~60":2.9,"61~65":.9,"66~70":.4,"71+":.2},gender:{"남성":9.2,"여성":90.4},revenue:552698640,orders:27618,peak:"31~35세",note:"연령 분포가 가장 고르게 분산. 40대 이상 비중이 높아 재구매 중심 카테고리입니다."},"설거지바":{age:{"14~16":0,"17~19":0,"20~25":1.1,"26~30":6.6,"31~35":15.9,"36~40":21,"41~45":23.6,"46~50":15.7,"51~55":9.3,"56~60":4,"61~65":1.5,"66~70":.8,"71+":.3},gender:{"남성":11.3,"여성":88.6},revenue:442573880,orders:21909,peak:"41~45세",note:"핵심 구매층이 36~50세. 20대 비중이 극히 낮아 가정 살림 중심 생활용품 특성이 뚜렷합니다."},"바디바":{age:{"14~16":0,"17~19":.1,"20~25":3.5,"26~30":10.1,"31~35":22.6,"36~40":20.9,"41~45":19.3,"46~50":12.4,"51~55":6.6,"56~60":2.3,"61~65":1.1,"66~70":.5,"71+":.1},gender:{"남성":12.9,"여성":86.8},revenue:304200000,orders:15531,peak:"31~35세",note:"남성 비율이 높은 편(12.9%). 아기비누 포함으로 30~40대 육아층이 집중되어 있습니다."},"세안바":{age:{"14~16":0,"17~19":.1,"20~25":3.8,"26~30":13.7,"31~35":18.2,"36~40":17.3,"41~45":17.6,"46~50":14.5,"51~55":7.9,"56~60":4.3,"61~65":1.5,"66~70":.5,"71+":.4},gender:{"남성":11.9,"여성":87.8},revenue:164945260,orders:11454,peak:"31~35세",note:"40~50대 비중이 높아 연령 분포가 넓고, 스킨케어 관심층이 오래 유지됩니다."},"트리트먼트":{age:{"14~16":.1,"17~19":.2,"20~25":5.5,"26~30":16.2,"31~35":21.3,"36~40":18,"41~45":17,"46~50":11.3,"51~55":6.6,"56~60":2.3,"61~65":1,"66~70":.2,"71+":.1},gender:{"남성":6.4,"여성":93.1},revenue:84822080,orders:7245,peak:"31~35세",note:"여성 비율 93.1%로 최상위. 헤어케어 루틴이 확립된 여성 고객 중심입니다."},"핸드크림":{age:{"14~16":.1,"17~19":.1,"20~25":4.5,"26~30":15.4,"31~35":26,"36~40":17.7,"41~45":18.3,"46~50":9.2,"51~55":5,"56~60":2.8,"61~65":.4,"66~70":.1,"71+":0},gender:{"남성":7.3,"여성":92.4},revenue:83875620,orders:3634,peak:"31~35세",note:"31~35세 집중도가 가장 높은 카테고리(26%). 선물+개인 사용 겸용 구간입니다."},"타블렛":{age:{"14~16":0,"17~19":.1,"20~25":1.9,"26~30":8.4,"31~35":16.1,"36~40":19.5,"41~45":23,"46~50":15.9,"51~55":8.2,"56~60":3.8,"61~65":2.2,"66~70":.2,"71+":.4},gender:{"남성":14.1,"여성":85.7},revenue:51958860,orders:2286,peak:"41~45세",note:"남성 비율 14.1%로 전 카테고리 최고. 설거지바와 유사한 40대+ 생활용품 성격입니다."}};
+
+const PROD_DATA={"퍼퓸바":[{name:"플라워 가든 퍼퓸바 세트",revenue:263884460,orders:5945,age:{"14~16":0,"17~19":.1,"20~25":3.7,"26~30":17.7,"31~35":25.5,"36~40":22,"41~45":16.5,"46~50":6.5,"51~55":5.4,"56~60":1.5,"61~65":.6,"66~70":.1,"71+":.1},female:89.2,male:10.6,peak:"31~35"},{name:"포레스트 빌리지 우디 퍼퓸바 세트",revenue:139591890,orders:2737,age:{"14~16":0,"17~19":0,"20~25":5.4,"26~30":14.9,"31~35":24.8,"36~40":21.3,"41~45":16.5,"46~50":8.1,"51~55":4.9,"56~60":3.2,"61~65":.7,"66~70":0,"71+":.1},female:86.9,male:12.9,peak:"31~35"},{name:"오 드 뚜왈렛 오브제 퍼퓸바",revenue:40976840,orders:1945,age:{"14~16":0,"17~19":0,"20~25":5.3,"26~30":12.7,"31~35":18.9,"36~40":17.1,"41~45":20.6,"46~50":13.4,"51~55":7.2,"56~60":3.2,"61~65":.9,"66~70":.3,"71+":.1},female:93.5,male:6.3,peak:"41~45"},{name:"화이트 블룸 퍼퓸바 세트",revenue:35422200,orders:756,age:{"14~16":0,"17~19":.1,"20~25":3.1,"26~30":8.9,"31~35":14.8,"36~40":12.6,"41~45":29.8,"46~50":18.5,"51~55":7.6,"56~60":2.3,"61~65":2.2,"66~70":.1,"71+":0},female:85.4,male:14.6,peak:"41~45"},{name:"윈터빌리지 퍼퓸바 세트",revenue:31948180,orders:891,age:{"14~16":0,"17~19":.3,"20~25":5.5,"26~30":19.2,"31~35":26.8,"36~40":15.4,"41~45":14.2,"46~50":7.8,"51~55":6.8,"56~60":3.3,"61~65":.4,"66~70":0,"71+":.1},female:90.6,male:9.2,peak:"31~35"},{name:"숲속의 동물들 퍼퓸바 세트",revenue:26564990,orders:696,age:{"14~16":.1,"17~19":.1,"20~25":3.4,"26~30":17.6,"31~35":24.4,"36~40":20.3,"41~45":19.6,"46~50":7.2,"51~55":4.1,"56~60":2,"61~65":.8,"66~70":.3,"71+":.1},female:90.3,male:9.7,peak:"31~35"},{name:"배러댄서프 바다의친구들 퍼퓸바",revenue:22304580,orders:586,age:{"14~16":0,"17~19":.2,"20~25":5.8,"26~30":27.4,"31~35":20.1,"36~40":22.6,"41~45":17.2,"46~50":4.3,"51~55":1.1,"56~60":.4,"61~65":.7,"66~70":0,"71+":.1},female:95,male:5,peak:"26~30"}],"샴푸바":[{name:"샴푸바 3종 묶음 + 거품망 증정",revenue:111246090,orders:3816,age:{"14~16":0,"17~19":.1,"20~25":5,"26~30":15.1,"31~35":21.5,"36~40":18.2,"41~45":17.1,"46~50":12.7,"51~55":6,"56~60":2.7,"61~65":.7,"66~70":.4,"71+":.3},female:91.2,male:8.5,peak:"31~35"},{name:"고체 샴푸바 7종 택1",revenue:89500200,orders:4389,age:{"14~16":0,"17~19":.2,"20~25":4.3,"26~30":14.6,"31~35":22.2,"36~40":17.8,"41~45":18.5,"46~50":11.7,"51~55":6.7,"56~60":2.4,"61~65":.7,"66~70":.6,"71+":.2},female:89.5,male:10.4,peak:"31~35"},{name:"샴푸바 지성용",revenue:47122020,orders:3292,age:{"14~16":.1,"17~19":.7,"20~25":8.1,"26~30":17.5,"31~35":23,"36~40":14.7,"41~45":15.1,"46~50":11,"51~55":5,"56~60":3.2,"61~65":.9,"66~70":.3,"71+":.2},female:88.9,male:10.9,peak:"31~35"},{name:"블루밍 퍼퓸바 모음 기획",revenue:41505000,orders:2041,age:{"14~16":0,"17~19":.1,"20~25":3.4,"26~30":10.4,"31~35":16,"36~40":15.8,"41~45":21.2,"46~50":15.7,"51~55":10.5,"56~60":4.8,"61~65":1.1,"66~70":.5,"71+":0},female:87.8,male:11.7,peak:"41~45"},{name:"블루밍 퍼퓸바 3종 택1",revenue:26346610,orders:1335,age:{"14~16":0,"17~19":0,"20~25":3.4,"26~30":11.8,"31~35":16.5,"36~40":18.4,"41~45":21.5,"46~50":13.9,"51~55":9,"56~60":3.5,"61~65":1.1,"66~70":.5,"71+":0},female:92.3,male:7.6,peak:"41~45"},{name:"고심이 샴푸바 중건성용 자몽향",revenue:22006950,orders:1370,age:{"14~16":0,"17~19":0,"20~25":5.3,"26~30":18,"31~35":23.5,"36~40":18.5,"41~45":17.4,"46~50":9.2,"51~55":5.5,"56~60":1.8,"61~65":.4,"66~70":.5,"71+":0},female:94.3,male:5.6,peak:"31~35"},{name:"샴푸바 쿨링용",revenue:21706600,orders:1592,age:{"14~16":.1,"17~19":.4,"20~25":4.8,"26~30":15.5,"31~35":20.4,"36~40":16.6,"41~45":16.7,"46~50":12.5,"51~55":8.2,"56~60":3.7,"61~65":.6,"66~70":.1,"71+":0},female:90.2,male:9.4,peak:"31~35"}],"설거지바":[{name:"설거지워싱바 1kg",revenue:211345520,orders:8625,age:{"14~16":0,"17~19":0,"20~25":.7,"26~30":5,"31~35":15.6,"36~40":22.5,"41~45":25.4,"46~50":15.6,"51~55":8.5,"56~60":3.9,"61~65":1.5,"66~70":.8,"71+":.5},female:87.3,male:12.6,peak:"41~45"},{name:"설거지비누 풋귤 1kg",revenue:79128120,orders:3236,age:{"14~16":0,"17~19":0,"20~25":.6,"26~30":5.1,"31~35":14,"36~40":17.9,"41~45":26.7,"46~50":17,"51~55":11.1,"56~60":4.8,"61~65":1.6,"66~70":.9,"71+":.3},female:89.8,male:10.2,peak:"41~45"},{name:"설거지워싱바 500g",revenue:62256430,orders:4711,age:{"14~16":0,"17~19":0,"20~25":1.7,"26~30":8.6,"31~35":17.2,"36~40":19.3,"41~45":21.3,"46~50":14.7,"51~55":9.7,"56~60":4.5,"61~65":1.5,"66~70":1.2,"71+":.1},female:89.6,male:10,peak:"41~45"},{name:"설거지선물세트",revenue:15800360,orders:382,age:{"14~16":0,"17~19":0,"20~25":1,"26~30":11.7,"31~35":23.4,"36~40":24.7,"41~45":15.3,"46~50":8,"51~55":12.9,"56~60":2.4,"61~65":.4,"66~70":.1,"71+":.2},female:90.2,male:9.8,peak:"36~40"},{name:"설거지 워싱바+풋귤 1+1",revenue:10878330,orders:418,age:{"14~16":0,"17~19":0,"20~25":1.8,"26~30":10.8,"31~35":18.1,"36~40":19.4,"41~45":20.2,"46~50":14.4,"51~55":9.3,"56~60":3.9,"61~65":1.3,"66~70":.4,"71+":.2},female:89.8,male:10,peak:"41~45"},{name:"설거지워싱바 150g 10개 세트",revenue:7991120,orders:210,age:{"14~16":0,"17~19":0,"20~25":1.9,"26~30":5.4,"31~35":18,"36~40":19.9,"41~45":17.9,"46~50":16.4,"51~55":12.9,"56~60":4.8,"61~65":2.9,"66~70":0,"71+":0},female:86.2,male:13.8,peak:"36~40"},{name:"설거지비누 풋귤 100g",revenue:7220280,orders:864,age:{"14~16":0,"17~19":.2,"20~25":1.8,"26~30":9.1,"31~35":15.7,"36~40":22.1,"41~45":10.4,"46~50":29.6,"51~55":6.2,"56~60":2.9,"61~65":.1,"66~70":.8,"71+":1},female:94.4,male:5.6,peak:"46~50"}],"바디바":[{name:"아기비누 알로에",revenue:60775500,orders:3453,age:{"14~16":0,"17~19":.1,"20~25":2.7,"26~30":8.1,"31~35":18.6,"36~40":29.2,"41~45":23,"46~50":8.9,"51~55":5.3,"56~60":1.4,"61~65":1.2,"66~70":.9,"71+":.1},female:85.6,male:13.9,peak:"36~40"},{name:"여행용키트",revenue:56010310,orders:1940,age:{"14~16":0,"17~19":0,"20~25":4.7,"26~30":10.8,"31~35":31.9,"36~40":12,"41~45":13.6,"46~50":16,"51~55":7.7,"56~60":1.5,"61~65":1.1,"66~70":.1,"71+":0},female:82.5,male:17,peak:"31~35"},{name:"가꿈비누 세트",revenue:19384750,orders:255,age:{"14~16":0,"17~19":.1,"20~25":.9,"26~30":5.8,"31~35":25.8,"36~40":33.6,"41~45":19.1,"46~50":7.2,"51~55":4.7,"56~60":.7,"61~65":2.2,"66~70":0,"71+":0},female:92.3,male:7.7,peak:"36~40"},{name:"가꿈비누 5종 묶음",revenue:19205160,orders:592,age:{"14~16":0,"17~19":0,"20~25":1.8,"26~30":5.3,"31~35":14,"36~40":18.1,"41~45":18.7,"46~50":23.6,"51~55":9.8,"56~60":4.5,"61~65":1,"66~70":2.5,"71+":.4},female:86.5,male:13.3,peak:"46~50"},{name:"가꿈비누 오이가지",revenue:17255850,orders:1639,age:{"14~16":0,"17~19":.1,"20~25":4,"26~30":11,"31~35":18.9,"36~40":19.3,"41~45":20.3,"46~50":15.3,"51~55":6.5,"56~60":2.4,"61~65":1.4,"66~70":.3,"71+":0},female:91,male:8.6,peak:"41~45"},{name:"가꿈비누 페퍼민트",revenue:16287950,orders:1674,age:{"14~16":0,"17~19":.5,"20~25":6.1,"26~30":12,"31~35":18.8,"36~40":16.7,"41~45":20.2,"46~50":14.6,"51~55":5.5,"56~60":3.6,"61~65":.9,"66~70":.9,"71+":0},female:85.2,male:14.6,peak:"41~45"},{name:"파머스 바 세트",revenue:15822430,orders:258,age:{"14~16":.2,"17~19":0,"20~25":1.1,"26~30":6.5,"31~35":23.7,"36~40":18.4,"41~45":27.6,"46~50":9.9,"51~55":5.8,"56~60":5.3,"61~65":.4,"66~70":0,"71+":.9},female:81.5,male:18.3,peak:"41~45"}],"세안바":[{name:"페이스 앤 바디바 레몬그라스",revenue:44781920,orders:3088,age:{"14~16":.1,"17~19":.1,"20~25":5.2,"26~30":13.8,"31~35":17.4,"36~40":18.2,"41~45":19.1,"46~50":13.6,"51~55":6.6,"56~60":2.9,"61~65":1.3,"66~70":.6,"71+":.8},female:86.2,male:13.5,peak:"41~45"},{name:"페이스앤바디바 레몬그라스 3개+망",revenue:35350310,orders:1132,age:{"14~16":0,"17~19":.1,"20~25":2.7,"26~30":11.9,"31~35":15.1,"36~40":20.2,"41~45":19.2,"46~50":13.8,"51~55":8.8,"56~60":5.6,"61~65":1.7,"66~70":.2,"71+":.5},female:86.1,male:13.7,peak:"36~40"},{name:"가꿈비누 바질",revenue:18724030,orders:1987,age:{"14~16":0,"17~19":0,"20~25":3.5,"26~30":10,"31~35":19.3,"36~40":14.4,"41~45":15.8,"46~50":19.8,"51~55":9.2,"56~60":5.2,"61~65":1.3,"66~70":.8,"71+":.5},female:88,male:11.9,peak:"46~50"},{name:"가꿈비누 케일",revenue:13261360,orders:1361,age:{"14~16":0,"17~19":.2,"20~25":4.5,"26~30":15.3,"31~35":23.7,"36~40":12.5,"41~45":14.3,"46~50":12.1,"51~55":8.2,"56~60":6.1,"61~65":1.6,"66~70":1.1,"71+":0},female:86.1,male:13.5,peak:"31~35"},{name:"세안비누 콜라겐",revenue:13194050,orders:1049,age:{"14~16":.1,"17~19":.1,"20~25":2.5,"26~30":10,"31~35":18.6,"36~40":16.7,"41~45":18.2,"46~50":16.4,"51~55":9.4,"56~60":4.8,"61~65":2.5,"66~70":.2,"71+":0},female:89.5,male:10.1,peak:"31~35"},{name:"고심이 페이스앤바디바 레몬그라스",revenue:10490880,orders:673,age:{"14~16":.3,"17~19":0,"20~25":6.7,"26~30":25.5,"31~35":25.7,"36~40":18.4,"41~45":9.5,"46~50":8.9,"51~55":2.5,"56~60":1.5,"61~65":.7,"66~70":0,"71+":.1},female:96.8,male:3.1,peak:"31~35"},{name:"가꿈비누 상추",revenue:10240970,orders:1127,age:{"14~16":0,"17~19":0,"20~25":2.2,"26~30":12.9,"31~35":16.9,"36~40":15.7,"41~45":16.8,"46~50":18,"51~55":8.8,"56~60":4.9,"61~65":3.5,"66~70":.3,"71+":0},female:89.8,male:10.1,peak:"46~50"}],"트리트먼트":[{name:"트리트먼트바",revenue:38116930,orders:3510,age:{"14~16":0,"17~19":.1,"20~25":5.7,"26~30":15.2,"31~35":20.9,"36~40":17.3,"41~45":17.9,"46~50":12.2,"51~55":7,"56~60":2.2,"61~65":.8,"66~70":.3,"71+":0},female:93.3,male:6.2,peak:"31~35"},{name:"린스바",revenue:24658190,orders:2160,age:{"14~16":.1,"17~19":.4,"20~25":4.9,"26~30":15.2,"31~35":20.4,"36~40":18.7,"41~45":17.7,"46~50":11.2,"51~55":6.6,"56~60":2.7,"61~65":1.3,"66~70":.2,"71+":.1},female:90.7,male:9,peak:"31~35"},{name:"비건 트리트먼트바 동백",revenue:11409720,orders:743,age:{"14~16":.1,"17~19":0,"20~25":2.7,"26~30":14.8,"31~35":20.6,"36~40":21.6,"41~45":15.3,"46~50":12.1,"51~55":7.6,"56~60":3,"61~65":1.6,"66~70":0,"71+":.2},female:94.8,male:4.8,peak:"36~40"},{name:"고심이 트리트먼트바",revenue:9626350,orders:772,age:{"14~16":0,"17~19":.3,"20~25":9.5,"26~30":24.4,"31~35":26.4,"36~40":14.7,"41~45":12.9,"46~50":7.1,"51~55":2.8,"56~60":1,"61~65":.3,"66~70":.2,"71+":0},female:96.6,male:2.8,peak:"31~35"},{name:"린스바 2개입",revenue:1010890,orders:60,age:{"14~16":0,"17~19":0,"20~25":7.4,"26~30":13.4,"31~35":18,"36~40":13.5,"41~45":22.4,"46~50":10.4,"51~55":13.4,"56~60":0,"61~65":0,"66~70":0,"71+":0},female:94,male:4.5,peak:"41~45"}],"핸드크림":[{name:"핸드크림 시어버터 무향",revenue:44853620,orders:2173,age:{"14~16":.1,"17~19":.2,"20~25":5.4,"26~30":16.9,"31~35":26.6,"36~40":19.1,"41~45":14,"46~50":9.4,"51~55":4.2,"56~60":3.4,"61~65":.3,"66~70":.1,"71+":0},female:90.9,male:8.7,peak:"31~35"},{name:"퍼퓸 핸드크림 미니 3종 세트",revenue:24908890,orders:651,age:{"14~16":0,"17~19":.1,"20~25":2.6,"26~30":12.1,"31~35":27.1,"36~40":14.3,"41~45":27.2,"46~50":8.3,"51~55":5,"56~60":2.2,"61~65":.6,"66~70":.2,"71+":.1},female:94.8,male:5,peak:"41~45"},{name:"핸드크림 튤립",revenue:4770880,orders:291,age:{"14~16":0,"17~19":0,"20~25":3.9,"26~30":14.5,"31~35":20.7,"36~40":21.3,"41~45":14.3,"46~50":11.5,"51~55":11.1,"56~60":2.4,"61~65":0,"66~70":0,"71+":0},female:94.9,male:4.8,peak:"36~40"},{name:"올인원 우드 괄사 + 핸드크림",revenue:4735830,orders:203,age:{"14~16":0,"17~19":0,"20~25":5.9,"26~30":17.6,"31~35":21.5,"36~40":20.9,"41~45":20.7,"46~50":8.7,"51~55":3.3,"56~60":.9,"61~65":.4,"66~70":0,"71+":0},female:94.6,male:5.4,peak:"31~35"},{name:"핸드크림 허브우드",revenue:4606400,orders:316,age:{"14~16":0,"17~19":0,"20~25":4.9,"26~30":18.5,"31~35":23.7,"36~40":15.7,"41~45":14.1,"46~50":10.9,"51~55":7.8,"56~60":2.8,"61~65":1.1,"66~70":0,"71+":0},female:89.8,male:9.5,peak:"31~35"}],"타블렛":[{name:"지구살림 세탁세제",revenue:34940870,orders:1369,age:{"14~16":0,"17~19":.2,"20~25":2.3,"26~30":9.8,"31~35":16.7,"36~40":17.7,"41~45":20.8,"46~50":14.9,"51~55":9.1,"56~60":4.8,"61~65":2.7,"66~70":.3,"71+":.6},female:85.7,male:14.2,peak:"41~45"},{name:"식기세척기 세제 타블렛",revenue:15355820,orders:834,age:{"14~16":0,"17~19":0,"20~25":1,"26~30":5.6,"31~35":14.9,"36~40":22.8,"41~45":28.5,"46~50":17.1,"51~55":6.4,"56~60":2.1,"61~65":1.2,"66~70":.2,"71+":0},female:85.6,male:14.1,peak:"41~45"},{name:"식기세척기 세제(리뉴얼)",revenue:1662170,orders:83,age:{"14~16":0,"17~19":0,"20~25":.8,"26~30":5.9,"31~35":15,"36~40":25.7,"41~45":19.7,"46~50":25.5,"51~55":6.6,"56~60":0,"61~65":0,"66~70":0,"71+":0},female:86.5,male:12.8,peak:"36~40"}]};
+
+const LABELS=["14~16","17~19","20~25","26~30","31~35","36~40","41~45","46~50","51~55","56~60","61~65","66~70","71+"];
+const CATS=Object.keys(CAT_DATA);
+let chart1,chart2,curCat1=CATS[0],curCat2=CATS[0],curProd=0;
+
+function fmt(n){return n>=100000000?(n/100000000).toFixed(1)+'억원':(n/10000).toLocaleString()+'만원'}
+
+function switchPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(el=>el.classList.remove('active'));
+  if(p==='overview'){
+    document.getElementById('page-overview').classList.add('active');
+    document.querySelectorAll('.page-tab')[0].classList.add('active');
+  } else {
+    document.getElementById('page-products').classList.add('active');
+    document.querySelectorAll('.page-tab')[1].classList.add('active');
+  }
+}
+
+function renderOverview(cat){
+  curCat1=cat;
+  const d=CAT_DATA[cat];
+  document.getElementById('tabs1').innerHTML=CATS.map(k=>`<button class="tab${k===cat?' active':''}" onclick="renderOverview('${k}')">${k}</button>`).join('');
+  document.getElementById('metrics1').innerHTML=`<div class="metric"><div class="metric-label">총 결제금액</div><div class="metric-value">${fmt(d.revenue)}</div></div><div class="metric"><div class="metric-label">총 결제건수</div><div class="metric-value">${d.orders.toLocaleString()}건</div></div><div class="metric"><div class="metric-label">핵심 연령대</div><div class="metric-value">${d.peak}</div></div>`;
+  const vals=LABELS.map(l=>d.age[l]||0),mx=Math.max(...vals),cols=vals.map(v=>v===mx?'#3266ad':'#B5D4F4');
+  if(chart1)chart1.destroy();
+  chart1=new Chart(document.getElementById('ageChart1'),{type:'bar',data:{labels:LABELS,datasets:[{data:vals,backgroundColor:cols,borderRadius:3,maxBarThickness:40}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(1)+'%'}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.06)'}},x:{ticks:{font:{size:11},maxRotation:45,autoSkip:false},grid:{display:false}}}}});
+  const f=d.gender['여성']||0,m=d.gender['남성']||0;
+  document.getElementById('gender1').innerHTML=`<div class="gender-bar"><div style="width:${f}%;background:#ED93B1;transition:width .3s"></div><div style="width:${m}%;background:#85B7EB;transition:width .3s"></div></div><div class="gender-legend"><span><span class="legend-dot" style="background:#ED93B1"></span>여성 ${f.toFixed(1)}%</span><span><span class="legend-dot" style="background:#85B7EB"></span>남성 ${m.toFixed(1)}%</span></div>`;
+  document.getElementById('insight1').textContent=d.note;
+}
+
+function renderProducts(cat,selIdx){
+  curCat2=cat;curProd=selIdx||0;
+  const prods=PROD_DATA[cat];
+  document.getElementById('tabs2').innerHTML=CATS.map(k=>`<button class="tab${k===cat?' active':''}" onclick="renderProducts('${k}')">${k}</button>`).join('');
+  document.getElementById('prodList').innerHTML=prods.map((p,i)=>`<div class="prod-item${i===curProd?' active':''}" onclick="selectProd(${i})"><div class="prod-row"><span class="prod-rank">${i+1}</span><span class="prod-name">${p.name}</span><span class="prod-rev">${fmt(p.revenue)}</span></div><div class="prod-meta"><span class="prod-badge badge-peak">핵심 ${p.peak}세</span><span class="prod-badge badge-female">여 ${p.female}%</span><span>결제 ${p.orders.toLocaleString()}건</span></div></div>`).join('');
+  renderDetail(cat,curProd);
+}
+
+function selectProd(i){
+  curProd=i;
+  document.querySelectorAll('.prod-item').forEach((el,j)=>{el.classList.toggle('active',j===i)});
+  renderDetail(curCat2,i);
+}
+
+function renderDetail(cat,idx){
+  const p=PROD_DATA[cat][idx],cd=CAT_DATA[cat];
+  document.getElementById('detailPanel').style.display='block';
+  document.getElementById('detailTitle').textContent=p.name;
+  document.getElementById('detailSub').textContent=cat+' 카테고리 · '+p.orders.toLocaleString()+'건 결제';
+  
+  const avgPrice=Math.round(p.revenue/p.orders);
+  document.getElementById('detailMetrics').innerHTML=`<div class="dm"><div class="dm-label">결제금액</div><div class="dm-val">${fmt(p.revenue)}</div></div><div class="dm"><div class="dm-label">결제건수</div><div class="dm-val">${p.orders.toLocaleString()}</div></div><div class="dm"><div class="dm-label">건당 단가</div><div class="dm-val">${Math.round(avgPrice/100)*100>10000?(Math.round(avgPrice/1000)*1000/10000).toFixed(1)+'만':avgPrice.toLocaleString()+'원'}</div></div><div class="dm"><div class="dm-label">핵심연령</div><div class="dm-val" style="color:#185fa5">${p.peak}세</div></div>`;
+  
+  const vals=LABELS.map(l=>p.age[l]||0),catVals=LABELS.map(l=>cd.age[l]||0),mx=Math.max(...vals);
+  if(chart2)chart2.destroy();
+  chart2=new Chart(document.getElementById('ageChart2'),{type:'bar',data:{labels:LABELS,datasets:[{label:'이 상품',data:vals,backgroundColor:vals.map(v=>v===mx?'#3266ad':'#B5D4F4'),borderRadius:3,maxBarThickness:32,order:1},{label:cat+' 평균',data:catVals,type:'line',borderColor:'#ED93B1',backgroundColor:'transparent',pointBackgroundColor:'#ED93B1',pointRadius:3,borderWidth:2,tension:.3,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.06)'}},x:{ticks:{font:{size:10},maxRotation:45,autoSkip:false},grid:{display:false}}}}});
+  
+  document.getElementById('gender2').innerHTML=`<div class="gender-bar"><div style="width:${p.female}%;background:#ED93B1;transition:width .3s"></div><div style="width:${p.male}%;background:#85B7EB;transition:width .3s"></div></div><div class="gender-legend"><span><span class="legend-dot" style="background:#ED93B1"></span>여성 ${p.female}%</span><span><span class="legend-dot" style="background:#85B7EB"></span>남성 ${p.male}%</span></div>`;
+  
+  const catF=cd.gender['여성']||0, catM=cd.gender['남성']||0;
+  const fDiff=(p.female-catF).toFixed(1), mDiff=(p.male-catM).toFixed(1);
+  const peakDiff=p.peak!==cd.peak.replace('세','')?`핵심 연령이 카테고리 평균(${cd.peak})과 다르게 ${p.peak}세에 집중.`:`카테고리 평균과 동일하게 ${p.peak}세 중심.`;
+  const genderNote=Math.abs(parseFloat(fDiff))>=3?`여성 비율이 카테고리 평균 대비 ${fDiff>0?'+':''}${fDiff}%p 차이.`:'성별 비율은 카테고리 평균과 유사.';
+  
+  document.getElementById('compareNote').innerHTML=`<span style="display:inline-flex;align-items:center;gap:4px"><span class="legend-dot" style="background:#3266ad"></span>이 상품</span>&nbsp;&nbsp;<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:16px;height:2px;background:#ED93B1;display:inline-block;border-radius:1px"></span>${cat} 평균</span><br>${peakDiff} ${genderNote}`;
+}
+
+renderOverview(curCat1);
+renderProducts(curCat2);
+</script>
+</body>
+</html>
